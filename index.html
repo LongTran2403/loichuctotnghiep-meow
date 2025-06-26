@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Love Message 3D Rain</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+      background: url('background.gif') no-repeat center center fixed;
+      background-size: cover;
+    }
+    canvas {
+      display: block;
+    }
+    .avatar-frame {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 5px solid #fff6aa;
+      box-shadow: 0 0 10px #fff6aa;
+      overflow: hidden;
+      background: #fff6aa88;
+      animation: spin 16s linear infinite, glow 3s linear infinite, shake 1s infinite ease-in-out;
+    }
+    .avatar-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .top-left, .bottom-left, .top-right, .bottom-right {
+      z-index: 10;
+    }
+    .top-left { top: 40px; left: 20px; }
+    .bottom-left { bottom: 40px; left: 20px; }
+    .top-right { top: 40px; right: 20px; }
+    .bottom-right { bottom: 40px; right: 20px; }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes glow {
+      0%   { border-color: hsl(0, 100%, 70%); box-shadow: 0 0 10px hsl(0, 100%, 70%); }
+      25%  { border-color: hsl(90, 100%, 70%); box-shadow: 0 0 10px hsl(90, 100%, 70%); }
+      50%  { border-color: hsl(180, 100%, 70%); box-shadow: 0 0 10px hsl(180, 100%, 70%); }
+      75%  { border-color: hsl(270, 100%, 70%); box-shadow: 0 0 10px hsl(270, 100%, 70%); }
+      100% { border-color: hsl(360, 100%, 70%); box-shadow: 0 0 10px hsl(360, 100%, 70%); }
+    }
+
+    @keyframes shake {
+      0% { transform: rotate(0deg) translate(0px, 0px); }
+      25% { transform: rotate(1deg) translate(1px, -1px); }
+      50% { transform: rotate(0deg) translate(0px, 0px); }
+      75% { transform: rotate(-1deg) translate(-1px, 1px); }
+      100% { transform: rotate(0deg) translate(0px, 0px); }
+    }
+
+    .avatar-frame::before {
+      content: "♥";
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 24px;
+      color: pink;
+      animation: pulse 1.2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.4); }
+      100% { opacity: 0.5; transform: scale(1); }
+    }
+
+    #changeMusicBtn {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      background-color: rgba(255, 255, 255, 0.3);
+      color: #333;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <audio id="bgMusic" autoplay loop>
+    <source src="music1.mp3" type="audio/mpeg">
+    Trình duyệt của bạn không hỗ trợ audio.
+  </audio>
+  <button id="changeMusicBtn">🎵 Đổi bài</button>
+
+  <div class="avatar-frame top-left"><img src="avatar1.jpg" alt="Avatar 1"></div>
+  <div class="avatar-frame bottom-left"><img src="avatar2.jpg" alt="Avatar 2"></div>
+  <div class="avatar-frame top-right"><img src="avatar3.jpg" alt="Avatar 3"></div>
+  <div class="avatar-frame bottom-right"><img src="avatar4.jpg" alt="Avatar 4"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FontLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/TextGeometry.js"></script>
+
+  <script>
+    const musicList = ["music1.mp3", "music2.mp3", "music3.mp3"];
+    let currentMusicIndex = 0;
+    const audioElement = document.getElementById("bgMusic");
+    document.getElementById("changeMusicBtn").addEventListener("click", () => {
+      currentMusicIndex = (currentMusicIndex + 1) % musicList.length;
+      audioElement.src = musicList[currentMusicIndex];
+      audioElement.play();
+    });
+
+    const messages = `Chúc em thi tốt nhé, Chúc em đạt được nguyện vọng một, Anh tin rằng em sẽ làm được mà, Cố gắng lên nhé, Làm bài thật tốt nhé, Về nhớ báo tin mừng cho anh nhé, Bình tĩnh tự tin và chiến thắng, Học tài thi đỗ nhé, Đạt điểm cao vút, Cánh cửa đại học rộng mở đang chờ em phía trước đó, Nhớ phải giữ một cái đầu lạnh và một tinh thần thép đấy, Anh sẽ luôn ở đây để chờ em báo tin trúng tuyển, Thi tốt anh thưởng, Đừng lo thi không tốt về anh nuôi hihi, Cầu được ước thấy, Gửi ngàn lời chúc may mắn đến em, Chúc em thi trúng tủ những câu đã ôn, Chúc em đậu vào ngành mà mình mong ước nhé, Chúc em vững tâm vững trí vững tay bút, Thi cử là một trò chơi và Hường sẽ là người chiến thắng, Cứ cố gắng hết mình thì kết quả nhận được sẽ xứng đáng, Cố gắng hết sức thành công sẽ tới với em, Đạt điểm cao ngút ngàn em nhé, Ước mơ của em sắp thành hiện thực rồi đấy chỉ còn một chút nữa thôi, Đường đến cổng trường đại học không còn xa, Mong may mắn sẽ luôn đến bên em, Tự tin và bứt phá nhé, Thành công rồi về ăn mừng nhé, Vượt qua thử thách để chạm tới ước mơ nhé, Không chỉ đậu mà còn điểm cao luôn nhé, Chỉ cần cố gắng hết mình thôi, Nguyện cầu điểm chuẩn thấp đúng ngành mà em chọn, Chúc em ôn đâu trúng đó, Hãy biến mọi nỗ lực và áp lực trở thành động lực, Mọi áp lực chỉ là hạt cát dưới chân, Làm bài không run nhé, Dù kết quả thế nào thì em vẫn là niềm tự hào của gia đình, Chúc hôm thi bụng không réo và đầu không quên, Hãy luôn tin vào bản thân, Mọi nỗ lực sẽ được đền đáp xứng đáng, Sau cơn mưa sẽ là cầu vồng và sau kỳ thi là thành công, Cố lên cô gái nhỏ có tên Thúy Hường, Tỉ lệ trúng câu đúng là 1000% khi khoanh bừa, Không bao giờ được phép bỏ cuộc, Kỳ thi này Hường nhất định thắng, Tập trung hết sức và hãy tạm quên mệt mỏi đi, Điểm cao nha, Vượt qua mọi thử thách, Chinh phục mục tiêu, Thành công rực rỡ, Tự tin nhé vì sẽ luôn có người âm thầm cổ vũ cho em, Học tài thi đậu, Đủ điểm xét tuyển nhé, Đạt kết quả rực rỡ, Điểm số đẹp long lanh, Làm bài đâu ra đấy, Kết quả khiến ai cũng bất ngờ, Gửi lời chúc đẹp nhất cho cô gái nghị lực, Bước ra phòng thi với nụ cười rạng rỡ nhé, Ngày nhận kết quả sẽ là ngày đẹp nhất, Mọi lo lắng hôm nay đổi thành niềm vui ngày mai, Cầu được ước thấy, 1000 lời chúc thân thương gửi đến em Hường <3`
+      .split(',').map(m => m.trim());
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.target.set(100, 0, 100);
+    camera.position.set(50, 0, 300);
+    controls.minDistance = 150;
+    controls.maxDistance = 350;
+
+    const fallingTexts = [];
+    const loader = new THREE.FontLoader();
+
+    loader.load('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/fonts/gentilis_regular.typeface.json', font => {
+      const radius = 300;
+      const count = messages.length * 2;
+
+      for (let i = 0; i < count; i++) {
+        const msg = messages[i % messages.length];
+        const geometry = new THREE.TextGeometry(msg, {
+          font: font,
+          size: 9,
+          height: 0.5,
+          curveSegments: 10
+        });
+
+        const material = new THREE.MeshBasicMaterial({ color: 0xffff99 });
+        const mesh = new THREE.Mesh(geometry, material);
+
+        const phi = Math.acos(1 - 2 * (i + 0.5) / count);
+        const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+        const x = radius * Math.sin(phi) * Math.cos(theta);
+        const y = radius * Math.sin(phi) * Math.sin(theta);
+        const z = radius * Math.cos(phi);
+
+        mesh.position.set(x, y, z - 50);
+        mesh.userData = {
+          speedY: 0.03 + Math.random() * 0.02
+        };
+
+        scene.add(mesh);
+        fallingTexts.push(mesh);
+      }
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      fallingTexts.forEach(text => {
+        text.position.y -= text.userData.speedY;
+        if (text.position.y < -300) {
+          text.position.y = 300;
+        }
+      });
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
